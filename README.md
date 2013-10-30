@@ -9,13 +9,14 @@ This was made just for fun.
 Compile and run the Project
 ====================
 Open the directory "simplechat" and use the java compiler:
-
+```
 javac SimpleChat.java
+```
 
 Then type:
-
+```
 java SimpleChat
-
+```
 Now you will asked to insert the host to connect with. If someone has connected to you, just click on enter to start chatting.
 Provided this information, you will start chatting with your buddy.
 
