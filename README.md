@@ -18,3 +18,10 @@ Then type:
 
 Now you will asked to insert the host and the host's port.
 Provided this information, you will start chatting with your buddy.
+
+TODO:
+================
+A Small todo list:
+Crypted Chat,
+A GUI,
+When your server accept a connection from someone, your client must connect to your opponten's Server.
