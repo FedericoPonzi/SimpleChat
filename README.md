@@ -8,20 +8,20 @@ This was made just for fun.
 
 Compile and run the Project
 ====================
-Open the directory of the project's main file (SimpleChat.java) and use the java compiler:
+Open the directory "simplechat" and use the java compiler:
 
-  javac SimpleChat.java
+javac SimpleChat.java
 
 Then type:
 
-  java SimpleChat
+java SimpleChat
 
-Now you will asked to insert the host and the host's port.
+Now you will asked to insert the host to connect with. If someone has connected to you, just click on enter to start chatting.
 Provided this information, you will start chatting with your buddy.
 
 TODO:
 ================
 A Small todo list:
-Crypted Chat,
-A GUI,
-When your server accept a connection from someone, your client must connect to your opponten's Server.
+* Crypted Chat,
+* A GUI,
+* Fix the Exit button
