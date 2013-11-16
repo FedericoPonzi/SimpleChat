@@ -1,5 +1,5 @@
 package simplechat;
-//Flagdizero was here
+
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,7 +22,8 @@ public class SimpleChat
 	 */
 	//private int port = (int) ( 4454 + (Math.random() * 100));
 	
-	private String nickname;
+	private String senderNickname;
+	private String addresseeNickname;
 	private Socket connection;
 	/**
 	 * Constructor, made with a String Nickname.
@@ -30,8 +31,7 @@ public class SimpleChat
 	 */
 	SimpleChat(String nickname)
 	{
-		this.nickname = nickname;
-		System.out.print(port);
+		this.senderNickname = nickname;
 		new Listener(this);
 	}
 	
@@ -39,6 +39,7 @@ public class SimpleChat
 	 * Method to connect to an Host.
 	 * @param socket
 	 */
+	
 	private void connect(String host)
 	{
 		try 
@@ -64,12 +65,28 @@ public class SimpleChat
 		this.connection = s;
 	}
 	/**
+	 * Set the AddresseeNickname
+	 * @param nickname
+	 */
+	public void setAddresseeNickname(String nickname)
+    {
+		addresseeNickname = nickname;
+    }
+	/**
+	 * Get the Addressee Nickname.
+	 * @return addresseeNickname
+	 */
+	public String getAddresseeNickname()
+    {
+		return addresseeNickname;
+    }
+	/**
 	 * Get the nickname
 	 * @return String nickname
 	 */
-	public String getNickname() 
+	public String getSenderNickname() 
 	{
-		return this.nickname;
+		return this.senderNickname;
 	}
 	/**
 	 * Return output stream
@@ -115,6 +132,7 @@ public class SimpleChat
 			try 
 			{
 				connection.close();
+				System.out.println("Chat ended!");
 			} 
 			catch (IOException e) 
 			{
@@ -122,10 +140,11 @@ public class SimpleChat
 			}
 	}
 	
-	public static void main(String[] args) throws IOException
+	@SuppressWarnings({ "resource", "unused" })
+    public static void main(String[] args) throws IOException
 	{
 		  Scanner s = new Scanner(System.in);
-		  System.out.println("Welcome to SChat. \n Give your IP and Portnumber to your mate \n And start chatting!");
+		  System.out.println("Welcome to SChat. \nGive your IP to your mate \nAnd start chatting!");
 	      System.out.println("Insert your nickname:");
 	      SimpleChat sc = new SimpleChat(s.nextLine());
 	      while(!sc.isConnected())
@@ -139,12 +158,28 @@ public class SimpleChat
 	      //OutputStream:
 	      DataOutputStream stream = new DataOutputStream(sc.getOutputStream());
 	      String send = "";
+	      /*
+	       * Username Setup:
+	       */
+	      stream.writeBytes(sc.getSenderNickname() + "\n");
+	      
+	      /*
+	       * Chat Setup:
+	       */
 	      while(true)
 	      {
 	    	  
 	    	  send = s.nextLine();
-		      stream.writeBytes(sc.getNickname() + ": " + send + "\n");
-		      if(send.equals("-exit")) break;
+		      stream.writeBytes(send + "\n");
+		      if(send.equals("-exit"))
+		      {
+		    	  sc.closeConnection(); 
+		    	  break;
+		      }
 	      }
 	}
+
+
+
+
 }

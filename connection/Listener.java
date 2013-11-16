@@ -21,7 +21,8 @@ public class Listener extends Thread
 	      // Start the thread
 	      start();
 	}
-	public void run()
+	@SuppressWarnings("resource")
+    public void run()
 	{
 		try 
 		{
