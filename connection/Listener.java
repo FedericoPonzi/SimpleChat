@@ -3,6 +3,7 @@ package connection;
 import java.io.IOException;
 import java.net.BindException;
 import java.net.ServerSocket;
+import java.net.Socket;
 
 import simplechat.SimpleChat;
 /**
@@ -26,10 +27,16 @@ public class Listener extends Thread
 	{
 		try 
 		{
+			Socket s;
 			ServerSocket listener = new ServerSocket(sc.getPort());
 			while(!sc.isConnected())
 			{
-				sc.setConnection(listener.accept());
+				//s = listener.accept();
+				//if(listener.accept() != null)
+				//{
+					sc.setConnection(listener.accept());
+					sc.chatLogWrite("Connected to: "+ listener.accept().getInetAddress().getHostAddress());
+				//}
 			}
 		}
 		catch (BindException e)

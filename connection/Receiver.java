@@ -32,7 +32,7 @@ public class Receiver extends Thread
 			while (sc.isConnected() && !text.equals("-exit")) 
 			{
 				text = inFromClient.readLine();
-				System.out.println(sc.getAddresseeNickname() + ": "+ text);
+				sc.chatLogWrite(sc.getAddresseeNickname() + ": "+ text);
 			}
 			sc.closeConnection();
 		}
