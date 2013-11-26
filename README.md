@@ -23,6 +23,5 @@ Provided this information, you will start chatting with your buddy.
 TODO:
 ================
 A Small todo list:
-* Crypted Chat,
+* Chat text have to be encoded,
 * A GUI,
-* Fix the Exit button
