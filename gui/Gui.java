@@ -35,7 +35,7 @@ public class Gui extends JFrame implements WindowListener, Runnable
 	private JTextArea chatLogArea;
 	private JTextField inputField;
 	private JLabel membersPane;
-
+	private JMenuItem fileDisconnect;
 	private String connectToIPInputBox;
 	private ArrayList<String> membersNickName;
 
@@ -122,14 +122,7 @@ public class Gui extends JFrame implements WindowListener, Runnable
 			{
 				if (arg0.getKeyCode() == KeyEvent.VK_ENTER)
 				{
-					try {
-						byte [] uft8byte = inputField.getText().getBytes("UTF8");
-						chatLogWrite(new String(uft8byte,"UTF8"));
-						sc.sendMessage(new String(uft8byte,"UTF8"));
-					} catch (UnsupportedEncodingException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+					sc.sendMessage(inputField.getText());
 				}
 			}
 
@@ -145,8 +138,6 @@ public class Gui extends JFrame implements WindowListener, Runnable
 			@Override
 			public void keyTyped(KeyEvent arg0)
 			{
-				// TODO Auto-generated method stub
-
 			}
 
 		});
@@ -163,7 +154,6 @@ public class Gui extends JFrame implements WindowListener, Runnable
 			{
 				if (sc.isConnected())
 				{
-					chatLogWrite(membersNickName.get(0) + ": " + inputField.getText());
 					sc.sendMessage(inputField.getText());
 					inputField.setText("");
 				}
@@ -201,21 +191,23 @@ public class Gui extends JFrame implements WindowListener, Runnable
 				sc.connect(connectToIPInputBox);
 			}
 		});
-		
-		JMenuItem fileExit = new JMenuItem("Disconnect");
-		fileExit.setEnabled(false);
-		fileExit.addActionListener(new ActionListener(){
+
+		fileDisconnect = new JMenuItem("Disconnect");
+		fileDisconnect.setEnabled(false);
+		fileDisconnect.addActionListener(new ActionListener()
+		{
 
 			@Override
-            public void actionPerformed(ActionEvent arg0)
-            {
+			public void actionPerformed(ActionEvent arg0)
+			{
 				sc.closeConnection();
-				
-            }
-			
+				sc.createListener();
+				setDisconnectButtonEnabled(false);
+			}
+
 		});
 		menuFile.add(fileConnect);
-		menuFile.add(fileExit);
+		menuFile.add(fileDisconnect);
 
 		// Elements of Help:
 		JMenuItem helpHelp = new JMenuItem("Help");
@@ -231,15 +223,20 @@ public class Gui extends JFrame implements WindowListener, Runnable
 	}
 
 	@Override
-	public void windowActivated(WindowEvent arg0){}
+	public void windowActivated(WindowEvent arg0)
+	{
+	}
 
 	@Override
 	public void windowClosed(WindowEvent arg0)
 	{
 		// TODO: Aggiungere chiusura connessione.
 	}
+
 	@Override
-	public void run(){}
+	public void run()
+	{
+	}
 
 	/**
 	 * Add a nickName to the Members List.
@@ -260,7 +257,8 @@ public class Gui extends JFrame implements WindowListener, Runnable
 		membersPane.setText("<html><p>Chat Members:<br><br><ul>");
 		for (String member : membersNickName)
 		{
-			membersPane.setText(membersPane.getText() + "<li>" + member + " </li>");
+			membersPane.setText(membersPane.getText() + "<li>" + member
+			        + " </li>");
 		}
 		membersPane.setText(membersPane.getText() + "</ul></html>");
 	}
@@ -279,18 +277,33 @@ public class Gui extends JFrame implements WindowListener, Runnable
 	}
 
 	@Override
-    public void windowClosing(WindowEvent arg0){}
+	public void windowClosing(WindowEvent arg0)
+	{
+	}
 
 	@Override
-    public void windowDeactivated(WindowEvent arg0){}
+	public void windowDeactivated(WindowEvent arg0)
+	{
+	}
 
 	@Override
-    public void windowDeiconified(WindowEvent arg0){}
+	public void windowDeiconified(WindowEvent arg0)
+	{
+	}
 
 	@Override
-    public void windowIconified(WindowEvent arg0){}
+	public void windowIconified(WindowEvent arg0)
+	{
+	}
 
 	@Override
-    public void windowOpened(WindowEvent arg0){}
+	public void windowOpened(WindowEvent arg0)
+	{
+	}
+
+	public void setDisconnectButtonEnabled(boolean b)
+	{
+		fileDisconnect.setEnabled(b);
+	}
 
 }

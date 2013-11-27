@@ -6,6 +6,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
@@ -36,7 +37,7 @@ public class SimpleChat
 	{
 		this.senderNickname = nickname;
 		this.gui = new Gui(nickname, this);
-		new Listener(this);
+		createListener();
 	}
 
 	/**
@@ -75,6 +76,7 @@ public class SimpleChat
 		chatLogWrite("Connection:" + isConnected());
 		new Receiver(this);
 		gui.setInputTextEditable(true);
+		gui.setDisconnectButtonEnabled(true);
 	}
 
 	/**
@@ -136,10 +138,7 @@ public class SimpleChat
 	 */
 	public boolean isConnected()
 	{
-		if (connection != null)
-			return connection.isConnected();
-		else
-			return false;
+		return connection == null ? false : true;
 	}
 
 	public void chatLogWrite(String message)
@@ -176,15 +175,28 @@ public class SimpleChat
 	public void sendMessage(String message)
 	{
 		try
-        {
-	        DataOutputStream output = new DataOutputStream(getOutputStream());
+		{
+			byte[] uft8byte = message.getBytes("UTF8");
+			chatLogWrite(getSenderNickname() + ": "
+			        + new String(uft8byte, "UTF8"));
+			message = new String(uft8byte, "UTF8");
+			DataOutputStream output = new DataOutputStream(getOutputStream());
 			output.writeBytes(message + "\n");
+		}
+		catch (UnsupportedEncodingException e)
+		{
+			e.printStackTrace();
 		}
 		catch (IOException e)
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+
+	}
+
+	public void createListener()
+	{
+		new Listener(this);
 	}
 
 	public static void main(String[] args) throws IOException
@@ -195,4 +207,6 @@ public class SimpleChat
 		sc.chatLogWrite("Click on File -> Connect, and Insert the host");
 		sc.chatLogWrite("Or wait for a connection!");
 	}
+
+
 }
