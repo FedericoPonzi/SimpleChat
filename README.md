@@ -17,8 +17,7 @@ Then type:
 ```
 java SimpleChat
 ```
-Now you will asked to insert the host to connect with. If someone has connected to you, just click on enter to start chatting.
-Provided this information, you will start chatting with your buddy.
+You will be prompted for a nickname. When ok is cliccked, the GUI and the Connection Listener will start. Click on File -> Connect and insert your buddy's IP to start chatting.
 
 TODO:
 ================
