@@ -9,6 +9,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -21,29 +23,32 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.text.DefaultCaret;
 
 import simplechat.SimpleChat;
 
 
 public class Gui extends JFrame implements WindowListener, Runnable
 {
+	private SimpleChat sc;
 	private static final long serialVersionUID = 2408778836724142968L;
-	private JPanel chatLog;
-	private JLabel chatComponents;
 	private JTextArea chatLogArea;
 	private JTextField inputField;
+	private JLabel membersPane;
+
 	private String connectToIPInputBox;
-	private SimpleChat sc;
-	private String[] chatMembers;
+	private ArrayList<String> membersNickName;
 
 	public Gui(String nickname, SimpleChat simpleChat)
 	{
+		membersNickName = new ArrayList<String>();
+		membersNickName.add(nickname);
 		this.sc = simpleChat;
 		// Some configurations:
 		Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
 		setSize(screen.width / 2, screen.height / 2);
-		setTitle("SimpleChat 0.0.2" + " | Ciao, "+ nickname);
-		setVisible(true);
+		setTitle("SimpleChat 0.0.2" + " | Ciao, " + nickname);
+
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLocationRelativeTo(null);
 		setLayout(new BorderLayout());
@@ -56,34 +61,48 @@ public class Gui extends JFrame implements WindowListener, Runnable
 		 */
 		add(getTextInputAndSendPanel(), BorderLayout.SOUTH);
 		add(getChatLogPanel(), BorderLayout.CENTER);
+		setVisible(true);
 	}
+
 	/**
 	 * Write to the ChatLog
-	 * @param String message
+	 * 
+	 * @param String
+	 *            message
 	 */
 	public void chatLogWrite(String message)
 	{
 		chatLogArea.append(message + "\n");
 	}
+
+	/**
+	 * Get Chat Log Panel.
+	 * 
+	 * @return
+	 */
 	public JPanel getChatLogPanel()
 	{
 		JPanel contentPanel = new JPanel(new BorderLayout());
 		contentPanel.setOpaque(true);
-		//ChatLog:
+		// ChatLog:
 		chatLogArea = new JTextArea(5, 30); // The textArea
+		DefaultCaret caret = (DefaultCaret) chatLogArea.getCaret();
+		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
 		chatLogArea.setEditable(false);
 		JScrollPane scrollPane = new JScrollPane(chatLogArea); // The scroller
 		contentPanel.add(scrollPane, BorderLayout.CENTER); // Adding the croller
-		//Members List:
+		// Members List:
 		JPanel secondPanel = new JPanel();
-		JLabel textPane = new JLabel();
-		textPane.setText("<html><p>Chat Members:<br> Tu madre<br> Tu zia</p></html>");
-		secondPanel.add(textPane, BorderLayout.NORTH);
+		membersPane = new JLabel();
+		updateMembersList();
+		secondPanel.add(membersPane, BorderLayout.NORTH);
 		contentPanel.add(secondPanel, BorderLayout.EAST);
 		return contentPanel; // Return the panel.
 	}
+
 	/**
 	 * Get the input text area, and the Send Button.
+	 * 
 	 * @return JPanel SouthPanel
 	 */
 	public JPanel getTextInputAndSendPanel()
@@ -91,37 +110,45 @@ public class Gui extends JFrame implements WindowListener, Runnable
 		JPanel panel = new JPanel();
 		panel.setLayout(new BorderLayout());
 		inputField = new JTextField();
+		inputField.setEnabled(false);
 		/*
 		 * Key Listener to grab when user Hits Enter:
 		 */
-		inputField.addKeyListener(new KeyListener(){
+		inputField.addKeyListener(new KeyListener()
+		{
 
 			@Override
-            public void keyPressed(KeyEvent arg0)
-            {
-				if(arg0.getKeyCode() == KeyEvent.VK_ENTER)
+			public void keyPressed(KeyEvent arg0)
+			{
+				if (arg0.getKeyCode() == KeyEvent.VK_ENTER)
 				{
-					chatLogWrite(inputField.getText());
-					sc.sendMessage(inputField.getText());
+					try {
+						byte [] uft8byte = inputField.getText().getBytes("UTF8");
+						chatLogWrite(new String(uft8byte,"UTF8"));
+						sc.sendMessage(new String(uft8byte,"UTF8"));
+					} catch (UnsupportedEncodingException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
-            }
+			}
 
 			@Override
-            public void keyReleased(KeyEvent arg0)
-            {
-				if(arg0.getKeyCode() == KeyEvent.VK_ENTER)
+			public void keyReleased(KeyEvent arg0)
+			{
+				if (arg0.getKeyCode() == KeyEvent.VK_ENTER)
 				{
-					inputField.setText("");	     
+					inputField.setText("");
 				}
-            }
+			}
 
 			@Override
-            public void keyTyped(KeyEvent arg0)
-            {
-	            // TODO Auto-generated method stub
-	            
-            }
-			
+			public void keyTyped(KeyEvent arg0)
+			{
+				// TODO Auto-generated method stub
+
+			}
+
 		});
 		panel.add(inputField, BorderLayout.CENTER);
 		JButton sendButton = new JButton("Send");
@@ -132,15 +159,15 @@ public class Gui extends JFrame implements WindowListener, Runnable
 		{
 
 			@Override
-            public void actionPerformed(ActionEvent arg0)
-            {
-				if(sc.isConnected())
+			public void actionPerformed(ActionEvent arg0)
+			{
+				if (sc.isConnected())
 				{
-					chatLogWrite(inputField.getText());
+					chatLogWrite(membersNickName.get(0) + ": " + inputField.getText());
 					sc.sendMessage(inputField.getText());
 					inputField.setText("");
 				}
-            }
+			}
 		});
 		sendButton.setSize(new Dimension(10, 10));
 		panel.add(sendButton, BorderLayout.EAST);
@@ -164,15 +191,29 @@ public class Gui extends JFrame implements WindowListener, Runnable
 
 		// Elements of File:
 		JMenuItem fileConnect = new JMenuItem("Connect");
-		fileConnect.addActionListener(new ActionListener(){
+		fileConnect.addActionListener(new ActionListener()
+		{
 			@Override
-            public void actionPerformed(ActionEvent e)
-            {
-				connectToIPInputBox = (String) JOptionPane.showInputDialog("Insert Your Mate's IP:");
+			public void actionPerformed(ActionEvent e)
+			{
+				connectToIPInputBox = (String) JOptionPane
+				        .showInputDialog("Insert Your Mate's IP:");
 				sc.connect(connectToIPInputBox);
-            }
+			}
 		});
+		
 		JMenuItem fileExit = new JMenuItem("Disconnect");
+		fileExit.setEnabled(false);
+		fileExit.addActionListener(new ActionListener(){
+
+			@Override
+            public void actionPerformed(ActionEvent arg0)
+            {
+				sc.closeConnection();
+				
+            }
+			
+		});
 		menuFile.add(fileConnect);
 		menuFile.add(fileExit);
 
@@ -183,59 +224,73 @@ public class Gui extends JFrame implements WindowListener, Runnable
 		menuHelp.add(helpAbout);
 		return menu;
 	}
-	
-	@Override
-    public void windowActivated(WindowEvent arg0)
-    {
-		
-    }
+
+	public void setInputTextEditable(boolean enabled)
+	{
+		inputField.setEnabled(enabled);
+	}
 
 	@Override
-    public void windowClosed(WindowEvent arg0)
-    {
-		//TODO: Aggiungere chiusura connessione.
-    }
+	public void windowActivated(WindowEvent arg0){}
 
 	@Override
-    public void windowClosing(WindowEvent arg0)
-    {
-		dispose();
-		System.exit(0);
-    }
-
+	public void windowClosed(WindowEvent arg0)
+	{
+		// TODO: Aggiungere chiusura connessione.
+	}
 	@Override
-    public void windowDeactivated(WindowEvent arg0)
-    {
-	    
-    }
+	public void run(){}
 
-	@Override
-    public void windowDeiconified(WindowEvent arg0)
-    {
-	    
-    }
+	/**
+	 * Add a nickName to the Members List.
+	 * 
+	 * @param nickName
+	 */
+	public void addNickname(String nickName)
+	{
+		membersNickName.add(nickName);
+		updateMembersList();
+	}
 
-	@Override
-    public void windowIconified(WindowEvent arg0)
-    {
-	    
-    }
+	/**
+	 * Method to update the Members List.
+	 */
+	private void updateMembersList()
+	{
+		membersPane.setText("<html><p>Chat Members:<br><br><ul>");
+		for (String member : membersNickName)
+		{
+			membersPane.setText(membersPane.getText() + "<li>" + member + " </li>");
+		}
+		membersPane.setText(membersPane.getText() + "</ul></html>");
+	}
 
-	@Override
-    public void windowOpened(WindowEvent arg0)
-    {
-	    
-    }
-
-	@Override
-    public void run()
-    {
-	    // TODO Auto-generated method stub
-	    
-    }
+	/**
+	 * Static Method to prompt the NickName
+	 * 
+	 * @return NickName
+	 */
 	public static String getNickName()
 	{
-		return (String) JOptionPane.showInputDialog("Choose a NickName:");
+		String nickName;
+		nickName = (String) JOptionPane.showInputDialog("Choose a NickName:");
+		if (nickName.length() == 0) nickName = "Guest";
+		return nickName;
 	}
+
+	@Override
+    public void windowClosing(WindowEvent arg0){}
+
+	@Override
+    public void windowDeactivated(WindowEvent arg0){}
+
+	@Override
+    public void windowDeiconified(WindowEvent arg0){}
+
+	@Override
+    public void windowIconified(WindowEvent arg0){}
+
+	@Override
+    public void windowOpened(WindowEvent arg0){}
 
 }

@@ -8,7 +8,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.Scanner;
 
 import connection.Listener;
 import connection.Receiver;
@@ -75,16 +74,18 @@ public class SimpleChat
 		sendMessage(getSenderNickname() + "\n");
 		chatLogWrite("Connection:" + isConnected());
 		new Receiver(this);
+		gui.setInputTextEditable(true);
 	}
 
 	/**
 	 * Set the AddresseeNickname
 	 * 
-	 * @param nickname
+	 * @param nickName
 	 */
-	public void setAddresseeNickname(String nickname)
+	public void setAddresseeNickname(String nickName)
 	{
-		addresseeNickname = nickname;
+		addresseeNickname = nickName;
+		gui.addNickname(nickName);
 	}
 
 	/**
@@ -165,7 +166,6 @@ public class SimpleChat
 		try
 		{
 			connection.close();
-			System.out.println("Chat ended!");
 		}
 		catch (IOException e)
 		{
@@ -176,12 +176,9 @@ public class SimpleChat
 	public void sendMessage(String message)
 	{
 		try
-		{
-			if (message.equals("-exit"))
-			{
-				closeConnection();
-			}
-			new DataOutputStream(getOutputStream()).writeBytes(message + "\n");
+        {
+	        DataOutputStream output = new DataOutputStream(getOutputStream());
+			output.writeBytes(message + "\n");
 		}
 		catch (IOException e)
 		{
@@ -189,7 +186,7 @@ public class SimpleChat
 			e.printStackTrace();
 		}
 	}
-	
+
 	public static void main(String[] args) throws IOException
 	{
 		String nickName = Gui.getNickName();
