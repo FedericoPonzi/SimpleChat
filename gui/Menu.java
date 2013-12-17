@@ -10,6 +10,7 @@ import javax.swing.JOptionPane;
 
 import simplechat.SimpleChat;
 
+@SuppressWarnings("serial")
 public class Menu extends JMenuBar
 {
 	private JMenuItem fileDisconnect;
@@ -30,7 +31,16 @@ public class Menu extends JMenuBar
 					public void actionPerformed(ActionEvent e)
 					{
 						String connectToIPInputBox = (String) JOptionPane.showInputDialog("Insert Your Mate's IP:");
-						SimpleChat.getInstance().connect(connectToIPInputBox);
+						try
+						{
+							int connectToPortInputBox = Integer.parseInt((String) JOptionPane.showInputDialog("Insert Your Mate's IP:"));
+							if(connectToPortInputBox > 65535 || connectToPortInputBox < 49152) sc.chatLogWrite("Plese provide a number greather then 65535 and lesser then 49152");
+							SimpleChat.getInstance().connect(connectToIPInputBox, connectToPortInputBox);
+						}
+							catch(NumberFormatException exc)
+						{
+							sc.chatLogWrite("Attenzione: Inserisci un indirizzo di porta numerico.");
+						}
 					}
 				});
 
@@ -55,6 +65,7 @@ public class Menu extends JMenuBar
 					public void actionPerformed(ActionEvent arg0)
 					{
 						sc.closeConnection();
+						sc.removeUPnPMapping();
 						System.exit(0);
 					}
 
@@ -64,6 +75,15 @@ public class Menu extends JMenuBar
 				menuFile.add(fileExit);
 				// Elements of Help:
 				JMenuItem helpHelp = new JMenuItem("Help");
+				helpHelp.addActionListener(new ActionListener()
+				{
+					
+					@Override
+					public void actionPerformed(ActionEvent arg0)
+					{
+						new HelpFrame();
+					}
+				});
 				JMenuItem helpAbout = new JMenuItem("About");
 				menuHelp.add(helpHelp);
 				menuHelp.add(helpAbout);

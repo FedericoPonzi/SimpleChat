@@ -7,12 +7,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.Map;
+import org.xml.sax.SAXException;
 
 import connection.Listener;
+import connection.PortSelector;
 import connection.Receiver;
-
+import connection.WeUpnp.GatewayDevice;
+import connection.WeUpnp.GatewayDiscover;
 /**
  * This is the main Class for the SimpleChat project.
  * 
@@ -20,14 +25,16 @@ import connection.Receiver;
  */
 public class SimpleChat
 {
-	//Singleton:
+	// Singleton:
 	private static SimpleChat sc;
 	// Port used from SimpleChat:
-	private final int port = 4455;
+	private int port;
 	private String senderNickname;
 	private String addresseeNickname;
 	private Socket connection;
+	private GatewayDevice gateway;
 	private Gui gui;
+	private String gwIp;
 
 	/**
 	 * Constructor, made with a String Nickname.
@@ -37,23 +44,56 @@ public class SimpleChat
 	 */
 	SimpleChat(String nickname)
 	{
-		//Singleton:
+		// Singleton:
 		sc = this;
 		this.senderNickname = nickname;
+		// Get all the Gateways.
+
+		try
+		{
+			GatewayDiscover gatewayDiscover = new GatewayDiscover();
+			Map<InetAddress, GatewayDevice> gateways = gatewayDiscover.discover();
+			if (gateways.isEmpty())
+			{
+				System.err.println("Seems like you are not connected to the internet");
+			}
+			// Select the first good gateway:
+			gateway = gatewayDiscover.getValidGateway();
+
+			if (null == gateway)
+			{
+				System.err.println("No active gateway device found.");
+				// No active gateway device found. Error :C
+			}
+			setGwIp(gateway.getExternalIPAddress());
+			setPort(new PortSelector(gateway).getPortSelected());
+			gateway.addPortMapping(port, port, gateway.getLocalAddress()
+			        .getHostAddress(), "TCP", "SimpleChat");
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		// If i come here, i've found a free port both on the local pc and on
+		// the Gateway Device
 		this.gui = new Gui(nickname);
 		createListener();
+
 	}
+
 	public static SimpleChat getInstance()
 	{
 		return sc;
 	}
+
 	/**
 	 * Method to connect to an Host.
+	 * @param port 
 	 * 
 	 * @param socket
 	 */
 
-	public void connect(String host)
+	public void connect(String host, int port)
 	{
 		try
 		{
@@ -78,12 +118,14 @@ public class SimpleChat
 	 */
 	public void setConnection(Socket s)
 	{
-		this.connection = s; //Set the connection
-		sendSCMessage(getSenderNickname() + "\n"); //Send your nickname
-		chatLogWrite("Connection:" + isConnected()); //Print that is connected
-		new Receiver(); //Set up the Receiver
-		gui.setInputTextEditable(true); //Set the input text field of the GUI editable
-		gui.setDisconnectButtonEnabled(true); //Set the File->Disconnect button Clickable
+		this.connection = s; // Set the connection
+		sendSCMessage(getSenderNickname() + "\n"); // Send your nickname
+		chatLogWrite("Connection:" + isConnected()); // Print that is connected
+		new Receiver(); // Set up the Receiver
+		gui.setInputTextEditable(true); // Set the input text field of the GUI
+		                                // editable
+		gui.setDisconnectButtonEnabled(true); // Set the File->Disconnect button
+		                                      // Clickable
 	}
 
 	/**
@@ -93,8 +135,8 @@ public class SimpleChat
 	 */
 	public void setAddresseeNickname(String nickName)
 	{
-		addresseeNickname = nickName; //Set your mate's nickname.
-		gui.addNickname(nickName); //And add it on the GUI.
+		addresseeNickname = nickName; // Set your mate's nickname.
+		gui.addNickname(nickName); // And add it on the GUI.
 	}
 
 	/**
@@ -127,7 +169,7 @@ public class SimpleChat
 	{
 		return connection.getOutputStream();
 	}
-	
+
 	/**
 	 * Get the Port Number
 	 * 
@@ -147,13 +189,15 @@ public class SimpleChat
 	{
 		return connection == null ? false : true;
 	}
+
 	/**
 	 * Write in the Chat Log JPane of the GUI.
+	 * 
 	 * @param message
 	 */
 	public void chatLogWrite(String message)
 	{
-		if(message.equals("01-CLOSE_REQ")) closeConnection();
+		if (message.equals("01-CLOSE_REQ")) closeConnection();
 		gui.chatLogWrite(message);
 	}
 
@@ -173,7 +217,7 @@ public class SimpleChat
 	 */
 	public void closeConnection()
 	{
-		if(isConnected())
+		if (isConnected())
 		{
 			try
 			{
@@ -190,8 +234,12 @@ public class SimpleChat
 			}
 		}
 	}
+
 	/**
-	 * Same {@link #sendChatMessage(String)} but is used to send a SimpleChat configuration message. It will not be printed on the screen. UTF-8 Encoded.
+	 * Same {@link #sendChatMessage(String)} but is used to send a SimpleChat
+	 * configuration message. It will not be printed on the screen. UTF-8
+	 * Encoded.
+	 * 
 	 * @param message
 	 */
 	public void sendSCMessage(String message)
@@ -211,8 +259,11 @@ public class SimpleChat
 			e.printStackTrace();
 		}
 	}
+
 	/**
-	 * Used to send a Chat Message. UTF-8 encoded, and message will be printed in the GUI's chatLogPane textarea.
+	 * Used to send a Chat Message. UTF-8 encoded, and message will be printed
+	 * in the GUI's chatLogPane textarea.
+	 * 
 	 * @param message
 	 */
 	public void sendChatMessage(String message)
@@ -220,7 +271,8 @@ public class SimpleChat
 		try
 		{
 			byte[] uft8byte = message.getBytes("UTF8");
-			chatLogWrite(getSenderNickname() + ": " + new String(uft8byte, "UTF8"));
+			chatLogWrite(getSenderNickname() + ": "
+			        + new String(uft8byte, "UTF8"));
 			message = new String(uft8byte, "UTF8");
 			DataOutputStream output = new DataOutputStream(getOutputStream());
 			output.writeBytes(message + "\n");
@@ -247,7 +299,34 @@ public class SimpleChat
 		sc.chatLogWrite("Welcome to SChat. \nGive your IP to your mate \nAnd start chatting!");
 		sc.chatLogWrite("Click on File -> Connect, and Insert the host");
 		sc.chatLogWrite("Or wait for a connection!");
+		sc.chatLogWrite("Your IP:" + sc.getGwIp() + "; Your Port:"+ sc.getPort());
 	}
 
+	public void setGwIp(String ip)
+	{
+		gwIp = ip;
+	}
 
+	public void setPort(int port)
+	{
+		this.port = port;
+	}
+
+	public String getGwIp()
+	{
+		return gwIp;
+	}
+
+	public void removeUPnPMapping()
+	{
+		try
+		{
+			gateway.deletePortMapping(port, "TCP");
+		}
+		catch (IOException | SAXException e)
+		{
+			System.err.println("Delet Port Mapping exception.");
+			e.printStackTrace();
+		}
+	}
 }

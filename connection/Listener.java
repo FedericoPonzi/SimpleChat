@@ -34,6 +34,7 @@ public class Listener extends Thread
 		try
 		{
 			ServerSocket listener = new ServerSocket(sc.getPort());
+			
 			while (!sc.isConnected())
 			{
 				Socket s = listener.accept();
@@ -43,6 +44,7 @@ public class Listener extends Thread
 		}
 		catch (BindException e)
 		{
+			//No more BindException C:
 			e.printStackTrace();
 			System.err.println("I'm using port number:" + sc.getPort());
 		}

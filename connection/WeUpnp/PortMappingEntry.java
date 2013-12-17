@@ -21,7 +21,7 @@
  * Daniele Castagna - daniele dot castagna at gmail dot com
  * 
  */
-package connection.holepunching;
+package connection.WeUpnp;
 
 /**
  * A <tt>PortMappingEntry</tt> is the class used to represent port mappings on
@@ -32,8 +32,8 @@ package connection.holepunching;
  * using the specified <tt>protocol</tt> to be redirected to port
  * <tt>internalPort</tt> of <tt>internalClient</tt>.
  *
- * @see connection.holepunching.wetorrent.upnp.GatewayDevice
- * @see connection.holepunching.wetorrent.upnp.GatewayDevice#getExternalIPAddress()
+ * @see org.wetorrent.upnp.GatewayDevice
+ * @see org.wetorrent.upnp.GatewayDevice#getExternalIPAddress()
  */
 public class PortMappingEntry {
 

@@ -22,7 +22,7 @@
  * 
  */
 
-package connection.holepunching;
+package connection.WeUpnp;
 
 import java.util.Map;
 import org.xml.sax.Attributes;

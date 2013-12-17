@@ -14,9 +14,6 @@ import java.util.ArrayList;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -34,8 +31,6 @@ public class Gui extends JFrame implements WindowListener, Runnable
 	private JTextArea chatLogArea;
 	private JTextField inputField;
 	private JLabel membersPane;
-
-	private String connectToIPInputBox;
 	private ArrayList<String> membersNickName;
 
 	public Gui(String nickname)
@@ -49,7 +44,7 @@ public class Gui extends JFrame implements WindowListener, Runnable
 		setSize(screen.width / 2, screen.height / 2);
 		setTitle("SimpleChat 0.0.2" + " | Ciao, " + nickname);
 
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		setLocationRelativeTo(null);
 		setLayout(new BorderLayout());
 		/*
@@ -195,6 +190,11 @@ public class Gui extends JFrame implements WindowListener, Runnable
 	@Override
 	public void windowClosing(WindowEvent arg0)
 	{
+		setVisible(false);
+		sc.closeConnection();
+		sc.removeUPnPMapping();
+		dispose();
+		System.exit(0);    
 	}
 
 	@Override
@@ -266,9 +266,9 @@ public class Gui extends JFrame implements WindowListener, Runnable
 	 */
 	public static String getNickName()
 	{
-		String nickName;
+		String nickName = "";
 		nickName = (String) JOptionPane.showInputDialog("Choose a NickName:");
-		if (nickName.length() == 0) nickName = "Guest";
+		nickName = nickName!= null? nickName : "Guest";
 		return nickName;
 	}
 }

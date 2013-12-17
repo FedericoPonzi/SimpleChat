@@ -22,7 +22,7 @@
  * 
  */
 
-package connection.holepunching;
+package connection.WeUpnp;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;

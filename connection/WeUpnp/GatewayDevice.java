@@ -21,7 +21,7 @@
  * Daniele Castagna - daniele dot castagna at gmail dot com
  * 
  */
-package connection.holepunching;
+package connection.WeUpnp;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -118,7 +118,7 @@ public class GatewayDevice {
      *
      * @throws SAXException if an error occurs while parsing the request
      * @throws IOException  on communication errors
-     * @see connection.holepunching.GatewayDeviceHandler
+     * @see org.bitlet.weupnp.GatewayDeviceHandler
      */
     public void loadDescription() throws SAXException, IOException {
 

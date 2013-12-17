@@ -21,7 +21,7 @@
  * Daniele Castagna - daniele dot castagna at gmail dot com
  *
  */
-package connection.holepunching;
+package connection.WeUpnp;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -48,7 +48,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
 /**
- * Handles the discovery of GatewayDevices, via the {@link connection.holepunching.GatewayDiscover#discover()} method.
+ * Handles the discovery of GatewayDevices, via the {@link org.bitlet.weupnp.GatewayDiscover#discover()} method.
  */
 public class GatewayDiscover {
 
