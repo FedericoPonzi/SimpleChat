@@ -40,7 +40,7 @@ public class SimpleChat
 		//Singleton:
 		sc = this;
 		this.senderNickname = nickname;
-		this.gui = new Gui(nickname, this);
+		this.gui = new Gui(nickname);
 		createListener();
 	}
 	public static SimpleChat getInstance()
@@ -243,8 +243,7 @@ public class SimpleChat
 
 	public static void main(String[] args) throws IOException
 	{
-		String nickName = Gui.getNickName();
-		SimpleChat sc = new SimpleChat(nickName);
+		SimpleChat sc = new SimpleChat(Gui.getNickName());
 		sc.chatLogWrite("Welcome to SChat. \nGive your IP to your mate \nAnd start chatting!");
 		sc.chatLogWrite("Click on File -> Connect, and Insert the host");
 		sc.chatLogWrite("Or wait for a connection!");

@@ -26,23 +26,23 @@ import javax.swing.text.DefaultCaret;
 
 import simplechat.SimpleChat;
 
-
 public class Gui extends JFrame implements WindowListener, Runnable
 {
 	private SimpleChat sc;
 	private static final long serialVersionUID = 2408778836724142968L;
+	private Menu menu;
 	private JTextArea chatLogArea;
 	private JTextField inputField;
 	private JLabel membersPane;
-	private JMenuItem fileDisconnect;
+
 	private String connectToIPInputBox;
 	private ArrayList<String> membersNickName;
 
-	public Gui(String nickname, SimpleChat simpleChat)
+	public Gui(String nickname)
 	{
 		membersNickName = new ArrayList<String>();
 		membersNickName.add(nickname);
-		this.sc = simpleChat;
+		this.sc = SimpleChat.getInstance();
 		membersPane = new JLabel();
 		// Some configurations:
 		Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
@@ -55,12 +55,14 @@ public class Gui extends JFrame implements WindowListener, Runnable
 		/*
 		 * Menu:
 		 */
-		setJMenuBar(getMenu());
+		menu = new Menu();
+		setJMenuBar(menu);
 		/*
 		 * Panels:
 		 */
 		add(getTextInputAndSendPanel(), BorderLayout.SOUTH);
 		add(getChatLogPanel(), BorderLayout.CENTER);
+		//JOptionPane.showMessageDialog(this, "Use this IP:" + ip +" and Port:" + port +);
 		setVisible(true);
 	}
 
@@ -93,7 +95,6 @@ public class Gui extends JFrame implements WindowListener, Runnable
 		contentPanel.add(scrollPane, BorderLayout.CENTER); // Adding the croller
 		// Members List:
 		JPanel secondPanel = new JPanel();
-		
 		updateMembersList();
 		secondPanel.add(membersPane, BorderLayout.NORTH);
 		contentPanel.add(secondPanel, BorderLayout.EAST);
@@ -139,7 +140,6 @@ public class Gui extends JFrame implements WindowListener, Runnable
 			public void keyTyped(KeyEvent arg0)
 			{
 			}
-
 		});
 		panel.add(inputField, BorderLayout.CENTER);
 		JButton sendButton = new JButton("Send");
@@ -148,7 +148,6 @@ public class Gui extends JFrame implements WindowListener, Runnable
 		 */
 		sendButton.addActionListener(new ActionListener()
 		{
-
 			@Override
 			public void actionPerformed(ActionEvent arg0)
 			{
@@ -163,70 +162,6 @@ public class Gui extends JFrame implements WindowListener, Runnable
 		panel.add(sendButton, BorderLayout.EAST);
 		return panel;
 	}
-
-	/**
-	 * getMenu() Returns the JMenuBar, with all the options and ready to be
-	 * attached to the main panel.
-	 * 
-	 * @return JMenuBar The Menu Bar
-	 */
-	private JMenuBar getMenu()
-	{
-		JMenuBar menu = new JMenuBar();
-		// Elements of the bar:
-		JMenu menuFile = new JMenu("File");
-		menu.add(menuFile);
-		JMenu menuHelp = new JMenu("Help");
-		menu.add(menuHelp);
-
-		// Elements of File:
-		JMenuItem fileConnect = new JMenuItem("Connect");
-		fileConnect.addActionListener(new ActionListener()
-		{
-			@Override
-			public void actionPerformed(ActionEvent e)
-			{
-				connectToIPInputBox = (String) JOptionPane
-				        .showInputDialog("Insert Your Mate's IP:");
-				sc.connect(connectToIPInputBox);
-			}
-		});
-
-		fileDisconnect = new JMenuItem("Disconnect");
-		fileDisconnect.setEnabled(false);
-		fileDisconnect.addActionListener(new ActionListener()
-		{
-
-			@Override
-			public void actionPerformed(ActionEvent arg0)
-			{
-				sc.sendSCMessage("01-CLOSE_REQ");
-				sc.closeConnection();
-			}
-
-		});
-		JMenuItem fileExit = new JMenuItem("Exit");
-		fileExit.addActionListener(new ActionListener(){
-
-			@Override
-            public void actionPerformed(ActionEvent arg0)
-            {
-				sc.closeConnection();
-	            System.exit(0);
-            }
-			
-		});
-		menuFile.add(fileConnect);
-		menuFile.add(fileDisconnect);
-		menuFile.add(fileExit);
-		// Elements of Help:
-		JMenuItem helpHelp = new JMenuItem("Help");
-		JMenuItem helpAbout = new JMenuItem("About");
-		menuHelp.add(helpHelp);
-		menuHelp.add(helpAbout);
-		return menu;
-	}
-
 	@Override
 	public void windowActivated(WindowEvent arg0)
 	{
@@ -243,14 +178,13 @@ public class Gui extends JFrame implements WindowListener, Runnable
 	{
 	}
 
-
 	/**
 	 * Method to update the Members List.
 	 */
 	private void updateMembersList()
 	{
 		String textToSet = "<html><p>Chat Members:<br><br><ol>";
-		
+
 		for (String member : membersNickName)
 		{
 			textToSet += "<li>" + member + " </li>";
@@ -311,7 +245,7 @@ public class Gui extends JFrame implements WindowListener, Runnable
 	 */
 	public void setDisconnectButtonEnabled(boolean b)
 	{
-		fileDisconnect.setEnabled(b);
+		menu.setDisconnectButtonEnabled(b);
 	}
 
 	/**
