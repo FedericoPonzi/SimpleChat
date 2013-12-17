@@ -20,6 +20,8 @@ import connection.Receiver;
  */
 public class SimpleChat
 {
+	//Singleton:
+	private static SimpleChat sc;
 	// Port used from SimpleChat:
 	private final int port = 4455;
 	private String senderNickname;
@@ -35,11 +37,16 @@ public class SimpleChat
 	 */
 	SimpleChat(String nickname)
 	{
+		//Singleton:
+		sc = this;
 		this.senderNickname = nickname;
 		this.gui = new Gui(nickname, this);
 		createListener();
 	}
-
+	public static SimpleChat getInstance()
+	{
+		return sc;
+	}
 	/**
 	 * Method to connect to an Host.
 	 * 
@@ -71,12 +78,12 @@ public class SimpleChat
 	 */
 	public void setConnection(Socket s)
 	{
-		this.connection = s;
-		sendMessage(getSenderNickname() + "\n");
-		chatLogWrite("Connection:" + isConnected());
-		new Receiver(this);
-		gui.setInputTextEditable(true);
-		gui.setDisconnectButtonEnabled(true);
+		this.connection = s; //Set the connection
+		sendSCMessage(getSenderNickname() + "\n"); //Send your nickname
+		chatLogWrite("Connection:" + isConnected()); //Print that is connected
+		new Receiver(); //Set up the Receiver
+		gui.setInputTextEditable(true); //Set the input text field of the GUI editable
+		gui.setDisconnectButtonEnabled(true); //Set the File->Disconnect button Clickable
 	}
 
 	/**
@@ -86,8 +93,8 @@ public class SimpleChat
 	 */
 	public void setAddresseeNickname(String nickName)
 	{
-		addresseeNickname = nickName;
-		gui.addNickname(nickName);
+		addresseeNickname = nickName; //Set your mate's nickname.
+		gui.addNickname(nickName); //And add it on the GUI.
 	}
 
 	/**
@@ -120,7 +127,7 @@ public class SimpleChat
 	{
 		return connection.getOutputStream();
 	}
-
+	
 	/**
 	 * Get the Port Number
 	 * 
@@ -140,9 +147,13 @@ public class SimpleChat
 	{
 		return connection == null ? false : true;
 	}
-
+	/**
+	 * Write in the Chat Log JPane of the GUI.
+	 * @param message
+	 */
 	public void chatLogWrite(String message)
 	{
+		if(message.equals("01-CLOSE_REQ")) closeConnection();
 		gui.chatLogWrite(message);
 	}
 
@@ -162,23 +173,54 @@ public class SimpleChat
 	 */
 	public void closeConnection()
 	{
+		if(isConnected())
+		{
+			try
+			{
+				getOutputStream().flush();
+				connection.close();
+				gui.removeNickName(getAddresseeNickname());
+				createListener();
+				gui.setDisconnectButtonEnabled(false);
+				chatLogWrite("--- Connection has been closed. ---");
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+			}
+		}
+	}
+	/**
+	 * Same {@link #sendChatMessage(String)} but is used to send a SimpleChat configuration message. It will not be printed on the screen. UTF-8 Encoded.
+	 * @param message
+	 */
+	public void sendSCMessage(String message)
+	{
 		try
 		{
-			connection.close();
+			message = new String(message.getBytes("UTF8"), "UTF8");
+			DataOutputStream output = new DataOutputStream(getOutputStream());
+			output.writeBytes(message + "\n");
+		}
+		catch (UnsupportedEncodingException e)
+		{
+			e.printStackTrace();
 		}
 		catch (IOException e)
 		{
 			e.printStackTrace();
 		}
 	}
-
-	public void sendMessage(String message)
+	/**
+	 * Used to send a Chat Message. UTF-8 encoded, and message will be printed in the GUI's chatLogPane textarea.
+	 * @param message
+	 */
+	public void sendChatMessage(String message)
 	{
 		try
 		{
 			byte[] uft8byte = message.getBytes("UTF8");
-			chatLogWrite(getSenderNickname() + ": "
-			        + new String(uft8byte, "UTF8"));
+			chatLogWrite(getSenderNickname() + ": " + new String(uft8byte, "UTF8"));
 			message = new String(uft8byte, "UTF8");
 			DataOutputStream output = new DataOutputStream(getOutputStream());
 			output.writeBytes(message + "\n");
@@ -196,7 +238,7 @@ public class SimpleChat
 
 	public void createListener()
 	{
-		new Listener(this);
+		new Listener();
 	}
 
 	public static void main(String[] args) throws IOException

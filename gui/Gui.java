@@ -9,7 +9,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
 import javax.swing.JButton;
@@ -44,6 +43,7 @@ public class Gui extends JFrame implements WindowListener, Runnable
 		membersNickName = new ArrayList<String>();
 		membersNickName.add(nickname);
 		this.sc = simpleChat;
+		membersPane = new JLabel();
 		// Some configurations:
 		Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
 		setSize(screen.width / 2, screen.height / 2);
@@ -93,7 +93,7 @@ public class Gui extends JFrame implements WindowListener, Runnable
 		contentPanel.add(scrollPane, BorderLayout.CENTER); // Adding the croller
 		// Members List:
 		JPanel secondPanel = new JPanel();
-		membersPane = new JLabel();
+		
 		updateMembersList();
 		secondPanel.add(membersPane, BorderLayout.NORTH);
 		contentPanel.add(secondPanel, BorderLayout.EAST);
@@ -122,7 +122,7 @@ public class Gui extends JFrame implements WindowListener, Runnable
 			{
 				if (arg0.getKeyCode() == KeyEvent.VK_ENTER)
 				{
-					sc.sendMessage(inputField.getText());
+					sc.sendChatMessage(inputField.getText());
 				}
 			}
 
@@ -154,7 +154,7 @@ public class Gui extends JFrame implements WindowListener, Runnable
 			{
 				if (sc.isConnected())
 				{
-					sc.sendMessage(inputField.getText());
+					sc.sendChatMessage(inputField.getText());
 					inputField.setText("");
 				}
 			}
@@ -200,26 +200,31 @@ public class Gui extends JFrame implements WindowListener, Runnable
 			@Override
 			public void actionPerformed(ActionEvent arg0)
 			{
+				sc.sendSCMessage("01-CLOSE_REQ");
 				sc.closeConnection();
-				sc.createListener();
-				setDisconnectButtonEnabled(false);
 			}
 
 		});
+		JMenuItem fileExit = new JMenuItem("Exit");
+		fileExit.addActionListener(new ActionListener(){
+
+			@Override
+            public void actionPerformed(ActionEvent arg0)
+            {
+				sc.closeConnection();
+	            System.exit(0);
+            }
+			
+		});
 		menuFile.add(fileConnect);
 		menuFile.add(fileDisconnect);
-
+		menuFile.add(fileExit);
 		// Elements of Help:
 		JMenuItem helpHelp = new JMenuItem("Help");
 		JMenuItem helpAbout = new JMenuItem("About");
 		menuHelp.add(helpHelp);
 		menuHelp.add(helpAbout);
 		return menu;
-	}
-
-	public void setInputTextEditable(boolean enabled)
-	{
-		inputField.setEnabled(enabled);
 	}
 
 	@Override
@@ -238,42 +243,19 @@ public class Gui extends JFrame implements WindowListener, Runnable
 	{
 	}
 
-	/**
-	 * Add a nickName to the Members List.
-	 * 
-	 * @param nickName
-	 */
-	public void addNickname(String nickName)
-	{
-		membersNickName.add(nickName);
-		updateMembersList();
-	}
 
 	/**
 	 * Method to update the Members List.
 	 */
 	private void updateMembersList()
 	{
-		membersPane.setText("<html><p>Chat Members:<br><br><ul>");
+		String textToSet = "<html><p>Chat Members:<br><br><ol>";
+		
 		for (String member : membersNickName)
 		{
-			membersPane.setText(membersPane.getText() + "<li>" + member
-			        + " </li>");
+			textToSet += "<li>" + member + " </li>";
 		}
-		membersPane.setText(membersPane.getText() + "</ul></html>");
-	}
-
-	/**
-	 * Static Method to prompt the NickName
-	 * 
-	 * @return NickName
-	 */
-	public static String getNickName()
-	{
-		String nickName;
-		nickName = (String) JOptionPane.showInputDialog("Choose a NickName:");
-		if (nickName.length() == 0) nickName = "Guest";
-		return nickName;
+		membersPane.setText(textToSet + "</ol></html>");
 	}
 
 	@Override
@@ -301,9 +283,58 @@ public class Gui extends JFrame implements WindowListener, Runnable
 	{
 	}
 
+	/**
+	 * Remove a Nickname from the membersNickName arraylist.
+	 * 
+	 * @param addresseeNickname
+	 */
+	public void removeNickName(String addresseeNickname)
+	{
+		membersNickName.remove(addresseeNickname);
+		updateMembersList();
+	}
+
+	/**
+	 * Set the InputText Editable
+	 * 
+	 * @param enabled
+	 */
+	public void setInputTextEditable(boolean enabled)
+	{
+		inputField.setEnabled(enabled);
+	}
+
+	/**
+	 * Set the Disconnect Button Enabled
+	 * 
+	 * @param b
+	 */
 	public void setDisconnectButtonEnabled(boolean b)
 	{
 		fileDisconnect.setEnabled(b);
 	}
 
+	/**
+	 * Add a nickName to the Members List.
+	 * 
+	 * @param nickName
+	 */
+	public void addNickname(String nickName)
+	{
+		membersNickName.add(nickName);
+		updateMembersList();
+	}
+
+	/**
+	 * Static Method to prompt the NickName
+	 * 
+	 * @return NickName
+	 */
+	public static String getNickName()
+	{
+		String nickName;
+		nickName = (String) JOptionPane.showInputDialog("Choose a NickName:");
+		if (nickName.length() == 0) nickName = "Guest";
+		return nickName;
+	}
 }

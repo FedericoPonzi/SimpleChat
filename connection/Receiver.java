@@ -17,10 +17,10 @@ public class Receiver extends Thread
 {
 	SimpleChat sc;
 
-	public Receiver(SimpleChat sc)
+	public Receiver()
 	{
 		super("Receiver thread");
-		this.sc = sc;
+		this.sc = SimpleChat.getInstance();
 		start();
 	}
 
@@ -29,19 +29,26 @@ public class Receiver extends Thread
 		try
 		{
 			String text = "";
-			BufferedReader inFromClient = new BufferedReader(
-			        new InputStreamReader(sc.getInputStream()));
+			BufferedReader inFromClient = new BufferedReader(new InputStreamReader(sc.getInputStream()));
 			sc.setAddresseeNickname(inFromClient.readLine());
-			while (sc.isConnected() && !text.equals("-exit"))
+			//TODO: Fix this:
+			Integer i = 0; //Dunno how to fix. Without this, the addreesseeNickname from the previous statement will be printed :C
+			while (sc.isConnected())
 			{
 				text = inFromClient.readLine();
-				sc.chatLogWrite(sc.getAddresseeNickname() + ": " + text);
+				if(text.equals("01-CLOSE_REQ")) sc.closeConnection();
+				else
+				{
+					if(i != 0) sc.chatLogWrite(sc.getAddresseeNickname() + ": " + text);
+					else i++;
+				}
 			}
 			sc.closeConnection();
 		}
 		catch (SocketException e)
 		{
-
+			System.err.println("SocketException! :C");
+			e.printStackTrace();
 		}
 		catch (IOException e)
 		{
