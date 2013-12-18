@@ -30,18 +30,21 @@ public class Menu extends JMenuBar
 					@Override
 					public void actionPerformed(ActionEvent e)
 					{
+						int connectToPortInputBox = 0;
 						String connectToIPInputBox = (String) JOptionPane.showInputDialog("Insert Your Mate's IP:");
 						try
 						{
-							int connectToPortInputBox = Integer.parseInt((String) JOptionPane.showInputDialog("Insert Your Mate's IP:"));
+							connectToPortInputBox= Integer.parseInt((String) JOptionPane.showInputDialog("Insert Your Mate's Port:"));
 							if(connectToPortInputBox > 65535 || connectToPortInputBox < 49152) sc.chatLogWrite("Plese provide a number greather then 65535 and lesser then 49152");
-							SimpleChat.getInstance().connect(connectToIPInputBox, connectToPortInputBox);
 						}
 							catch(NumberFormatException exc)
 						{
 							sc.chatLogWrite("Attenzione: Inserisci un indirizzo di porta numerico.");
 						}
+						SimpleChat.getInstance().connect(connectToIPInputBox, connectToPortInputBox);
+
 					}
+
 				});
 
 				fileDisconnect = new JMenuItem("Disconnect");

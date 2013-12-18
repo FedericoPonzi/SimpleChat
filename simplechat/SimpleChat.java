@@ -101,6 +101,7 @@ public class SimpleChat
 		}
 		catch (UnknownHostException e)
 		{
+			chatLogWrite("Impossible to find your mate's host :C. Check twice his Ip :) ");
 			e.printStackTrace();
 		}
 		catch (IOException e)

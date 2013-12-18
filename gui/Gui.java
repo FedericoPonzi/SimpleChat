@@ -7,6 +7,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.util.ArrayList;
@@ -23,7 +24,7 @@ import javax.swing.text.DefaultCaret;
 
 import simplechat.SimpleChat;
 
-public class Gui extends JFrame implements WindowListener, Runnable
+public class Gui extends JFrame implements Runnable
 {
 	private SimpleChat sc;
 	private static final long serialVersionUID = 2408778836724142968L;
@@ -42,7 +43,7 @@ public class Gui extends JFrame implements WindowListener, Runnable
 		// Some configurations:
 		Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
 		setSize(screen.width / 2, screen.height / 2);
-		setTitle("SimpleChat 0.0.2" + " | Ciao, " + nickname);
+		setTitle("SimpleChat 0.0.2 | Ciao, " + nickname);
 
 		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		setLocationRelativeTo(null);
@@ -58,6 +59,19 @@ public class Gui extends JFrame implements WindowListener, Runnable
 		add(getTextInputAndSendPanel(), BorderLayout.SOUTH);
 		add(getChatLogPanel(), BorderLayout.CENTER);
 		//JOptionPane.showMessageDialog(this, "Use this IP:" + ip +" and Port:" + port +);
+		addWindowListener(new WindowAdapter()
+		{
+			public void windowClosing(WindowEvent e)
+			{
+				setVisible(false);
+				sc.closeConnection();
+				sc.removeUPnPMapping();
+				dispose();
+				System.exit(0);
+			}
+		}
+		
+				);
 		setVisible(true);
 	}
 
@@ -157,16 +171,8 @@ public class Gui extends JFrame implements WindowListener, Runnable
 		panel.add(sendButton, BorderLayout.EAST);
 		return panel;
 	}
-	@Override
-	public void windowActivated(WindowEvent arg0)
-	{
-	}
 
-	@Override
-	public void windowClosed(WindowEvent arg0)
-	{
-		// TODO: Aggiungere chiusura connessione.
-	}
+	
 
 	@Override
 	public void run()
@@ -187,36 +193,7 @@ public class Gui extends JFrame implements WindowListener, Runnable
 		membersPane.setText(textToSet + "</ol></html>");
 	}
 
-	@Override
-	public void windowClosing(WindowEvent arg0)
-	{
-		setVisible(false);
-		sc.closeConnection();
-		sc.removeUPnPMapping();
-		dispose();
-		System.exit(0);    
-	}
-
-	@Override
-	public void windowDeactivated(WindowEvent arg0)
-	{
-	}
-
-	@Override
-	public void windowDeiconified(WindowEvent arg0)
-	{
-	}
-
-	@Override
-	public void windowIconified(WindowEvent arg0)
-	{
-	}
-
-	@Override
-	public void windowOpened(WindowEvent arg0)
-	{
-	}
-
+	
 	/**
 	 * Remove a Nickname from the membersNickName arraylist.
 	 * 
