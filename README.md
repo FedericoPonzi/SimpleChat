@@ -10,7 +10,7 @@ Compile and run the Project
 Open the directory "simplechat" and use the java compiler:
 ```
 javac SimpleChat.java
-This is a try
+```
 Then type:
 ```
 java SimpleChat
